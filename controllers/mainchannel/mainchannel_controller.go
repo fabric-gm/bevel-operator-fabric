@@ -1026,6 +1026,17 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 			Rule: "MAJORITY Endorsement",
 		},
 	}
+	if channel.Spec.ChannelConfig.Application != nil &&
+		channel.Spec.ChannelConfig.Application.Policies != nil &&
+		len(*channel.Spec.ChannelConfig.Application.Policies) > 0 {
+		for k, v := range *channel.Spec.ChannelConfig.Application.Policies {
+			policies[k] = configtx.Policy{
+				Type:      v.Type,
+				Rule:      v.Rule,
+				ModPolicy: v.ModPolicy,
+			}
+		}
+	}
 	application := configtx.Application{
 		Organizations: peerOrgs,
 		Capabilities:  []string{"V2_0"},
@@ -1050,6 +1061,15 @@ func (r *FabricMainChannelReconciler) mapToConfigTX(channel *hlfv1alpha1.FabricM
 				Rule: "MAJORITY Admins",
 			},
 		},
+	}
+	if channel.Spec.ChannelConfig.Policies != nil && len(*channel.Spec.ChannelConfig.Policies) > 0 {
+		for k, v := range *channel.Spec.ChannelConfig.Policies {
+			channelConfig.Policies[k] = configtx.Policy{
+				Type:      v.Type,
+				Rule:      v.Rule,
+				ModPolicy: v.ModPolicy,
+			}
+		}
 	}
 	return channelConfig, nil
 }
